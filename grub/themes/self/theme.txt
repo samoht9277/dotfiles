@@ -1,0 +1,20 @@
+title-text: ""
+desktop-image: "background.png"
+terminal-left: "0"
+terminal-top: "0"
+terminal-width: "100%"
+terminal-height: "100%"
+terminal-border: "0"
+
++ boot_menu {
+  left = 40%
+  top = 40%
+  width = 40%
+  height = 30%
+  item_font = "Victor's Pixel Font Regular 32"
+  item_color = "#4f4f4f"
+  selected_item_color = "#380000"
+  item_spacing = 0
+  icon_width = 0
+  item_icon_space = 0
+}
