@@ -45,13 +45,13 @@ import XMonad.Util.SpawnOnce
 
 myModMask = mod4Mask :: KeyMask
 
-myTerminal = "alacritty --option font.size=13":: String
+myTerminal = "alacritty --option font.size=15":: String
 
 myBorderWidth = 2 :: Dimension
 
-myNormColor = "#6272A4" :: String
+myNormColor = "#AEAEAE" :: String
 
-myFocusColor = "#EBCB8B" :: String
+myFocusColor = "#FFFFFF" :: String
 
 windowCount :: X (Maybe String)
 windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
@@ -59,6 +59,7 @@ windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace
 myStartupHook :: X ()
 myStartupHook = do
     spawnOnce "bash ~/.xmonad/start.sh"
+    spawnOnce "sleep 5 && nm-applet &"
     setWMName "LG3D"
 
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
@@ -78,14 +79,14 @@ tall = renamed [Replace "tall"]
 monocle = renamed [Replace "monocle"] $ limitWindows 20 Full
 
 grid = renamed [Replace "grid"]
-    $ limitWindows 12
+    $ limitWindows 7
     $ mySpacing 4
     $ mkToggle (single MIRROR)
     $ Grid (16 / 10)
 
-threeCol = renamed [Replace "threeColumn"]
+threeCol = renamed [Replace "columns"]
     $ limitWindows 7
-    $ mySpacing' 4
+    $ mySpacing 4
     $ ThreeCol 1 (3 / 100) (1 / 3)
 
 floats = renamed [Replace "float"] $ limitWindows 20 simplestFloat
@@ -100,8 +101,8 @@ myLayoutHook = avoidStruts
     $ mkToggle (NBFULL ?? NOBORDERS ?? EOT) myDefaultLayout
   where
     myDefaultLayout = 
-        noBorders monocle
-        ||| tall
+        tall
+	||| noBorders monocle
         ||| threeCol
         ||| grid
 
@@ -114,7 +115,6 @@ xmobarEscape = concatMap doubleLts
 myWorkspaces :: [String]
 myWorkspaces = clickable . (map xmobarEscape)
     $ ["\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 "]
-    -- $ ["\xf269 ", "\xe795 ", "\xf121 ", "\xf53a ", "\xf827 ", "\xe799 ", "\xf74a ", "\xf7e8 ", "\xf827 "]
   where
     clickable l = ["<action=xdotool key super+" ++ show (i) ++ "> " ++ ws ++ "</action>" | (i, ws) <- zip [1 .. 9] l]
 
@@ -138,8 +138,8 @@ myKeys =
     -- Quit xmonad
     ("M-C-<Esc>", io exitSuccess),
 
-	----------------- Swapping Screen Focus -------------
-	("M-`", nextScreen),
+    ----------------- Swapping Screen Focus -------------
+    ("M-`", nextScreen),
 
     ----------------- Floating windows ------------------
 
@@ -178,9 +178,9 @@ myKeys =
     -- Terminal
     ("M-<Return>", spawn myTerminal),
     -- Power Menu
-    ("M-<Esc>", spawn "~/.config/rofi/bin/powermenu"),
-    ("M-m", spawn "~/.config/rofi/bin/launcher_text"),
-    ("M-S-q", spawn "~/.config/rofi/bin/powermenu"),
+    ("M-<Esc>", spawn "~/.config/rofi/powermenu/powermenu.sh"),
+    ("M-m", spawn "~/.config/rofi/launchers/text/launcher.sh"),
+    ("M-S-q", spawn "~/.config/rofi/powermenu/powermenu.sh"),
 
     --------------------- Hardware ---------------------
 
@@ -231,23 +231,11 @@ main = do
         -- Log hook
         logHook = workspaceHistoryHook <+> dynamicLogWithPP xmobarPP {
             ppOutput = \x -> hPutStrLn xmobarMonitorLG x >> hPutStrLn xmobarMonitorSG x,
-            -- Current workspace in xmobar
-            ppCurrent = xmobarColor "#EBCB8B" "",
-            -- . wrap "[" " ]",
-            -- Visible but not current workspace
-            ppVisible = xmobarColor "#B48EAD" "",
-            -- Hidden workspaces in xmobar
-            ppHidden = xmobarColor "#A3BE8C" "",
-            -- Hidden workspaces (no windows)
-            ppHiddenNoWindows = xmobarColor "#B48EAD" "",
-            -- Title of active window in xmobar
-            ppTitle = xmobarColor "#6272a4" "" . shorten 50,
-            -- Separators in xmobar
+            ppCurrent = xmobarColor "#FFFFFF" "" . \s -> " \xf111 ",
+            ppVisible = xmobarColor "#FFFFFF" "" . \s  -> " \xf192 ",
+            ppHidden = xmobarColor "#FFFFFF" "" . \s -> " \xf1db ",
+            ppHiddenNoWindows = xmobarColor "#515151" "" . \s -> " \xf1db ",
             ppSep = "<fc=#666666> | </fc>",
-            -- Urgent workspace
-            ppUrgent = xmobarColor "#C45500" "" . wrap "" "!",
-            -- Number of windows in current workspace
-            --ppExtras = [windowCount],
-            ppOrder = \(ws : l : t : ex) -> [ws, l] ++ ex ++ [t]
+            ppOrder = \(ws : l : _ : _ ) -> [ws,l]
         } >> updatePointer (0.5, 0.5) (0.5, 0.5) 
 } `additionalKeysP` myKeys
