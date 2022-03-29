@@ -15,14 +15,18 @@ else
 fi
 
 if [ -f /tmp/screenshot/clipboard.webp ]; then
-	if [ $(stat -c%s "$file") = "0" ]; then
-		exit 0
+	if [ ! $(stat -c%s "$file") = "0" ]; then
+		ACTION=$(dunstify 'Screenshot taken!' 'Image saved to the clipboard.' --action="default, test" --icon=$file -r $id)
+		case "$ACTION" in
+		"default")
+			feh $file
+			;;
+		esac	
 	fi
 	# Image to clipboard.
-	dunstify 'Screenshot taken!' 'Image has been saved to the clipboard.' --icon=$file -r $id
 	sleep 1
 	rm $file
 else
 	# Image saved to disk.
-	dunstify 'Screenshot taken!' 'Image has been saved to the ~/Downloads directory.' --icon=$file -r $id
+	dunstify 'Screenshot taken!' 'Image saved on ~/Downloads.' --icon=$file -r $id
 fi
