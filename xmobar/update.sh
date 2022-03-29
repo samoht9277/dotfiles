@@ -1,0 +1,1 @@
+alacritty --option font.size=15 -e fish -c "yay -yaSu && sudo pacman -Syu"

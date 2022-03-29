@@ -1,22 +1,19 @@
 Config { 
     font = "xft:UbuntuMono Nerd Font:weight=bold:pixelsize=16:antialias=true:hinting=true",
-    bgColor = "#2E3440",
-    fgColor = "#f07178",
-    lowerOnStart = False, -- True
-    hideOnStart = False,
-    allDesktops = True,
-    persistent = True,
+    bgColor = "#1e1e2d",
+    fgColor = "#FFFFFF",
+	lowerOnStart = True,
+	hideOnStart = False,
+    position = Static { xpos = 5, ypos = 130, width = 1355, height = 30 },
+	alpha = 255,
     commands = [ 
         Run Com "bash" ["-c", "checkupdates | wc -l"] "updates" 6000,
-        Run Date "%d/%m" "date" 60000,
-        Run Com "bash" ["-c", "date +'%I:%M %p'"] "time" 600,
+        Run Com "/home/tomi/.config/xmobar/trayer-padding-icon.sh" [] "trayerpad" 1000,
         Run UnsafeStdinReader
     ],
     alignSep = "}{",
     template = "%UnsafeStdinReader% }{ \
-	\<fc=#B48EAD> %updates%</fc>\
-	\<fc=#666666> | </fc>\
-	\<fc=#B287D4> %date%</fc>\
-	\<fc=#666666> | </fc>\
-	\<fc=#8BE9FD> %time%  </fc>"
+	\<action=`/home/tomi/.config/xmobar/update.sh` button=12345><fc=#fae3b0> %updates%</fc></action>\
+    \<fc=#666666> | </fc>\
+    \%trayerpad%"
 }
