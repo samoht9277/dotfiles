@@ -45,7 +45,7 @@ import XMonad.Util.SpawnOnce
 
 myModMask = mod4Mask :: KeyMask
 
-myTerminal = "alacritty --option font.size=15":: String
+myTerminal = "alacritty --option font.size=12":: String
 
 myBorderWidth = 2 :: Dimension
 
@@ -60,36 +60,31 @@ myStartupHook :: X ()
 myStartupHook = do
     spawnOnce "bash ~/.xmonad/start.sh"
     spawnOnce "sleep 5 && nm-applet &"
-    setWMName "LG3D"
+    setWMName "XMonad"
 
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
 mySpacing i = spacingRaw False (Border i i i i) True (Border i i i i) True
 
--- Single window with no gaps
-mySpacing' :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
-mySpacing' i = spacingRaw True (Border i i i i) True (Border i i i i) True
-
 -- Layouts definition
 
-tall = renamed [Replace "tall"]
+tall = renamed [Replace "\xfb3f"]
     $ limitWindows 6
     $ mySpacing 4
     $ ResizableTall 1 (3 / 100) (1 / 2) []
 
-monocle = renamed [Replace "monocle"] $ limitWindows 20 Full
-
-grid = renamed [Replace "grid"]
-    $ limitWindows 7
+grid = renamed [Replace "\xfa6f"]
+    $ limitWindows 4
     $ mySpacing 4
     $ mkToggle (single MIRROR)
     $ Grid (16 / 10)
 
-threeCol = renamed [Replace "columns"]
+threeCol = renamed [Replace "\xfa6b"]
     $ limitWindows 7
     $ mySpacing 4
     $ ThreeCol 1 (3 / 100) (1 / 3)
 
-floats = renamed [Replace "float"] $ limitWindows 20 simplestFloat
+floats = renamed [Replace "float"] 
+    $ limitWindows 20 simplestFloat
 
 -- Layout hook
 
@@ -102,7 +97,6 @@ myLayoutHook = avoidStruts
   where
     myDefaultLayout = 
         tall
-	||| noBorders monocle
         ||| threeCol
         ||| grid
 
@@ -113,10 +107,7 @@ xmobarEscape = concatMap doubleLts
     doubleLts x = [x]
 
 myWorkspaces :: [String]
-myWorkspaces = clickable . (map xmobarEscape)
-    $ ["\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 ", "\xf0c8 "]
-  where
-    clickable l = ["<action=xdotool key super+" ++ show (i) ++ "> " ++ ws ++ "</action>" | (i, ws) <- zip [1 .. 9] l]
+myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 myKeys :: [(String, X ())]
 myKeys = 
@@ -173,6 +164,8 @@ myKeys =
 
     -- Browser
     ("M-b", spawn "firefox"),
+    -- Private Browser
+    ("M-S-b", spawn "firefox --private-window"),
     -- File explorer
     ("M-e", spawn "thunar ~/"),
     -- Terminal
@@ -188,19 +181,19 @@ myKeys =
     ("<XF86AudioPlay>", spawn "playerctl play-pause"),
     ("<XF86AudioPrev>", spawn "playerctl previous"),
     ("<XF86AudioNext>", spawn "playerctl next"),
+    ("C-<XF86AudioPlay>", spawn "/home/tomi/code/xmonad/audio/songrec/scan.sh"),
 
     -- Print
     ("<Print>", spawn "bash ~/code/xmonad/screen/screenshot.sh crop"),
     ("M-<Print>", spawn "bash /home/tomi/code/xmonad/screen/screenshot.sh"),
 
-    -- Red Screen
-    ("<Pause>", spawn "redshift -O 5500"),
-    ("M-<Pause>", spawn "redshift -x"),
+    -- Toggle Compositor
+    ("<Pause>", spawn "/home/tomi/code/xmonad/compositor/toggle.sh"),
 
     -- Volume
-    ("<XF86AudioLowerVolume>", spawn "~/code/xmonad/audio/volume.sh volume down"),
-    ("<XF86AudioRaiseVolume>", spawn "~/code/xmonad/audio/volume.sh volume up"),
-    ("<XF86AudioMute>", spawn "~/code/xmonad/audio/volume.sh mute" ),
+    ("<XF86AudioLowerVolume>", spawn "~/code/xmonad/audio/volume.sh down"),
+    ("<XF86AudioRaiseVolume>", spawn "~/code/xmonad/audio/volume.sh up"),
+    ("<XF86AudioMute>", spawn "~/code/xmonad/audio/mute.sh" ),
     
     -- HUE
     ("C-<XF86AudioMute>", spawn "~/code/xmonad/light/OnOff.sh"),
@@ -235,7 +228,8 @@ main = do
             ppVisible = xmobarColor "#FFFFFF" "" . \s  -> " \xf192 ",
             ppHidden = xmobarColor "#FFFFFF" "" . \s -> " \xf1db ",
             ppHiddenNoWindows = xmobarColor "#515151" "" . \s -> " \xf1db ",
+            ppExtras = [],
             ppSep = "<fc=#666666> | </fc>",
-            ppOrder = \(ws : l : _ : _ ) -> [ws,l]
+            ppOrder = \(ws : l : _ : ex ) -> [ws,l] ++ ex
         } >> updatePointer (0.5, 0.5) (0.5, 0.5) 
 } `additionalKeysP` myKeys
