@@ -14,7 +14,7 @@ terminal-border: "0"
   height = 50%
   item_font = ""
   item_color = "#ffffff"
-  selected_item_color = "#6877A7"
+  selected_item_color = "#CD5437"
   item_spacing = 0
   item_icon_space = 0
 }
@@ -26,7 +26,7 @@ terminal-border: "0"
         height = 30
         id = "__timeout__"
         text = "booting in %d..."
-        border_color = "#6877A7"
+        border_color = "#CD5437"
 }
 
 + image {
