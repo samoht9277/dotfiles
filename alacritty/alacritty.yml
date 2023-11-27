@@ -1,9 +1,3 @@
-window:
-  opacity: 1
-
-cursor:
-  style: beam
-
 colors:
   bright:
     black: '0x988BA2'
@@ -16,7 +10,7 @@ colors:
     yellow: '0xFAE3B0'
   cursor:
     cursor: '0xF5E0DC'
-    text: '0x1E1D2F'
+    text: '0x1E1E2D'
   indexed_colors:
   - color: '0xF8BD96'
     index: 16
@@ -32,12 +26,19 @@ colors:
     white: '0xD9E0EE'
     yellow: '0xFAE3B0'
   primary:
-    background: '0x1E1D2F'
+    background: '0x1E1E2D'
     foreground: '0xD9E0EE'
+cursor:
+  style: beam
 font:
+  offset:
+    x: 0
+    y: 0
   bold:
     family: Hack Nerd Font
   italic:
     family: Hack Nerd Font
   normal:
     family: Hack Nerd Font
+window:
+  opacity: 1
