@@ -14,8 +14,8 @@ import XMonad.Actions.UpdatePointer
 import XMonad.Hooks.DynamicLog (PP (..), dynamicLogWithPP, shorten, wrap, xmobarColor, xmobarPP)
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeInactive
-import XMonad.Hooks.ManageDocks (ToggleStruts (..), avoidStruts, docksEventHook, manageDocks)
-import XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen)
+import XMonad.Hooks.ManageDocks (ToggleStruts (..), avoidStruts, docksEventHook, manageDocks, docks)
+import XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, isDialog)
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.WorkspaceHistory
 import XMonad.Hooks.InsertPosition
@@ -45,7 +45,7 @@ import XMonad.Util.SpawnOnce
 
 myModMask = mod4Mask :: KeyMask
 
-myTerminal = "alacritty --option font.size=12":: String
+myTerminal = "alacritty --option font.size=11":: String
 
 myBorderWidth = 2 :: Dimension
 
@@ -59,7 +59,8 @@ windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace
 myStartupHook :: X ()
 myStartupHook = do
     spawnOnce "bash ~/.xmonad/start.sh"
-    spawnOnce "sleep 5 && nm-applet &"
+    spawnOnce "nm-applet &"
+    spawnOnce "blueman-applet &"
     setWMName "XMonad"
 
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
@@ -82,6 +83,9 @@ threeCol = renamed [Replace "\xfa6b"]
     $ limitWindows 7
     $ mySpacing 4
     $ ThreeCol 1 (3 / 100) (1 / 3)
+    
+full = renamed [Replace "\xf792"]
+    $ limitWindows 7
 
 floats = renamed [Replace "float"] 
     $ limitWindows 20 simplestFloat
@@ -170,38 +174,44 @@ myKeys =
     ("M-e", spawn "thunar ~/"),
     -- Terminal
     ("M-<Return>", spawn myTerminal),
+    -- Calculator
+    ("M-c", spawn "galculator"),
     -- Power Menu
-    ("M-<Esc>", spawn "~/.config/rofi/powermenu/powermenu.sh"),
-    ("M-m", spawn "~/.config/rofi/launchers/text/launcher.sh"),
-    ("M-S-q", spawn "~/.config/rofi/powermenu/powermenu.sh"),
+    ("M-<Esc>", spawn "~/.config/rofi/main/main.sh"),
+    ("M-m", spawn "~/.config/rofi/launchers/launcher.sh"),
 
     --------------------- Hardware ---------------------
 
     -- Multimedia
-    ("<XF86AudioPlay>", spawn "playerctl play-pause"),
+    ("<XF86AudioPlay>", spawn "/home/tomi/.xmonad/shortcuts/audio/playpause.sh"),
     ("<XF86AudioPrev>", spawn "playerctl previous"),
     ("<XF86AudioNext>", spawn "playerctl next"),
-    ("C-<XF86AudioPlay>", spawn "/home/tomi/code/xmonad/audio/songrec/scan.sh"),
+    ("C-<XF86AudioPlay>", spawn "/home/tomi/.xmonad/shortcuts/audio/songrec/scan.sh"),
 
     -- Print
-    ("<Print>", spawn "bash ~/code/xmonad/screen/screenshot.sh crop"),
-    ("M-<Print>", spawn "bash /home/tomi/code/xmonad/screen/screenshot.sh"),
+    ("<Print>", spawn "bash /home/tomi/.xmonad/shortcuts/screen/screenshot.sh crop"),
+    ("M-<Print>", spawn "bash /home/tomi/.xmonad/shortcuts/screen/screenshot.sh"),
 
     -- Toggle Compositor
-    ("<Pause>", spawn "/home/tomi/code/xmonad/compositor/toggle.sh"),
+    ("<Pause>", spawn "/home/tomi/.xmonad/shortcuts/compositor/toggle.sh"),
+    
+    -- Keyboard Layout
+    ("M-S-;", spawn "/home/tomi/.xmonad/shortcuts/keyboard/switch_layout.sh"),
 
     -- Volume
-    ("<XF86AudioLowerVolume>", spawn "~/code/xmonad/audio/volume.sh down"),
-    ("<XF86AudioRaiseVolume>", spawn "~/code/xmonad/audio/volume.sh up"),
-    ("<XF86AudioMute>", spawn "~/code/xmonad/audio/mute.sh" ),
+    ("C-<Down>", spawn "/home/tomi/.xmonad/shortcuts/audio/volume.sh down"),
+    ("C-<Up>", spawn "/home/tomi/.xmonad/shortcuts/audio/volume.sh up"),
+    ("<XF86AudioMute>", spawn "/home/tomi/.xmonad/shortcuts/audio/mute.sh"),
     
     -- HUE
-    ("C-<XF86AudioMute>", spawn "~/code/xmonad/light/OnOff.sh"),
-    ("C-<XF86AudioRaiseVolume>", spawn "~/code/xmonad/light/Brightness.sh + 50"),
-    ("C-<XF86AudioLowerVolume>", spawn "~/code/xmonad/light/Brightness.sh - 50"),
+    ("M-<Up>", spawn "bash ~/home/tomi/.xmonad/shortcuts/light/Brightness.sh + 50"),
+    ("M-<Down>", spawn "bash /home/tomi/.xmonad/shortcuts/Brightness.sh - 50")
+    ]
 
-    -- Microphone
-    ("M-S-<XF86AudioMute>", spawn "~/code/xmonad/microphone/microphone.sh")
+myManageHook = composeAll
+    [
+    (isDialog --> doF W.swapUp) <+> insertPosition Below Newer
+    --(isFullscreen --> doFullFloat) <+> manageDocks <+> insertPosition Below Newer
     ]
 
 main :: IO ()
@@ -210,9 +220,10 @@ main = do
     xmobarMonitorLG <- spawnPipe "xmobar -x 0 ~/.config/xmobar/primary.hs"
     xmobarMonitorSG <- spawnPipe "xmobar -x 1 ~/.config/xmobar/secondary.hs"
     -- Xmonad
-    xmonad $ ewmh def {
-        manageHook = (isFullscreen --> doFullFloat) <+> manageDocks <+> insertPosition Below Newer,
-        handleEventHook = docksEventHook,
+    xmonad $ docks def {
+        --manageHook = manageDocks <+> manageHook def,
+        manageHook = myManageHook,
+        --handleEventHook = docksEventHook,
         modMask = myModMask,
         terminal = myTerminal,
         startupHook = myStartupHook,
@@ -227,9 +238,9 @@ main = do
             ppCurrent = xmobarColor "#FFFFFF" "" . \s -> " \xf111 ",
             ppVisible = xmobarColor "#FFFFFF" "" . \s  -> " \xf192 ",
             ppHidden = xmobarColor "#FFFFFF" "" . \s -> " \xf1db ",
-            ppHiddenNoWindows = xmobarColor "#515151" "" . \s -> " \xf1db ",
+            ppHiddenNoWindows = xmobarColor "#888888" "" . \s -> " \xf1db ",
             ppExtras = [],
-            ppSep = "<fc=#666666> | </fc>",
+            ppSep = "<fc=#DBDBDB> | </fc>",
             ppOrder = \(ws : l : _ : ex ) -> [ws,l] ++ ex
         } >> updatePointer (0.5, 0.5) (0.5, 0.5) 
 } `additionalKeysP` myKeys
