@@ -1,1 +1,1 @@
-alacritty --option font.size=15 -e fish -c "yay -yaSu && sudo pacman -Syu"
+alacritty --class pacman --option font.size=15 -e fish -c "yay -yaSu && sudo pacman -Syu" | /home/tomi/.config/xmobar/move.sh pacman 1
