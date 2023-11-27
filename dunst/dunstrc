@@ -1,3 +1,5 @@
+# See dunst(5) for all configuration options
+
 [global]
     ### Display ###
 
@@ -17,23 +19,33 @@
     # will be ignored.
     follow = none
 
-    # The geometry of the window:
-    #   [{width}]x{height}[+/-{x}+/-{y}]
-    # The geometry of the message window.
-    # The height is measured in number of notifications everything else
-    # in pixels.  If the width is omitted but the height is given
-    # ("-geometry x2"), the message window expands over the whole screen
-    # (dmenu-like).  If width is 0, the window expands to the longest
-    # message displayed.  A positive x is measured from the left, a
-    # negative from the right side of the screen.  Y is measured from
-    # the top and down respectively.
-    # The width can be negative.  In this case the actual width is the
-    # screen width minus the width defined in within the geometry option.
-	offset = 13x42
-    width = 400
-	height = 700
+    ### Geometry ###
 
-    # Turn on the progess bar
+    # dynamic width from 0 to 300
+    # width = (0, 300)
+    # constant width of 300
+    width = 400
+
+    # The maximum height of a single notification, excluding the frame.
+    height = 130
+
+    # Position the notification in the top right corner
+    origin = top-right
+
+    # Offset from the origin
+    #offset = 10x45
+    offset = 8x8
+
+    # Scale factor. It is auto-detected if value is 0.
+    scale = 0
+
+    # Maximum number of notification (0 means no limit)
+    notification_limit = 2
+
+    ### Progress bar ###
+
+    # Turn on the progess bar. It appears when a progress hint is passed with
+    # for example dunstify -h int:value:12
     progress_bar = true
 
     # Set the progress bar height. This includes the frame, so make sure
@@ -49,26 +61,20 @@
     # Set the maximum width for the progress bar
     progress_bar_max_width = 500
 
-    # Show how many messages are currently hidden (because of geometry).
-    indicate_hidden = yes
 
-    # Shrink window if it's smaller than the width.  Will be ignored if
-    # width is 0.
-    shrink = no
+    # Show how many messages are currently hidden (because of
+    # notification_limit).
+    indicate_hidden = yes
 
     # The transparency of the window.  Range: [0; 100].
     # This option will only work if a compositing window manager is
-    # present (e.g. xcompmgr, compiz, etc.).
+    # present (e.g. xcompmgr, compiz, etc.). (X11 only)
     transparency = 15
-
-    # The height of the entire notification.  If the height is smaller
-    # than the font height and padding combined, it will be raised
-    # to the font height and padding.
-    # notification_height = 100
 
     # Draw a line of "separator_height" pixel height between two
     # notifications.
     # Set to 0 to disable.
+    # If gap_size is greater than 0, this setting will be ignored.
     separator_height = 10
 
     # Padding between text and separator.
@@ -85,7 +91,13 @@
     frame_width = 5
 
     # Defines color of the frame around the notification window.
-    frame_color = "#504b69"
+    frame_color = "#36435aff"
+
+    # Size of gap to display between notifications - requires a compositor.
+    # If value is greater than 0, separator_height will be ignored and a border
+    # of size frame_width will be drawn around each notification instead.
+    # Click events on gaps do not currently propagate to applications below.
+    gap_size = 0
 
     # Define a color for the separator.
     # possible values are:
@@ -103,14 +115,15 @@
     # Set to 0 to disable.
     # A client can set the 'transient' hint to bypass this. See the rules
     # section for how to disable this if necessary
-    idle_threshold = 0
+    idle_threshold = 120
 
     ### Text ###
 
-    font = UbuntuMono Nerd Font 16
+    font = SF Mono 16
+
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
-    line_height = 0
+    line_height = 5
 
     # Possible values are:
     # full: Allow a small subset of html markup in notifications:
@@ -120,7 +133,7 @@
     #        <u>underline</u>
     #
     #        For a complete reference see
-    #        <https://developer.gnome.org/pango/stable/pango-Markup.html>.
+    #        <https://docs.gtk.org/Pango/pango_markup.html>.
     #
     # strip: This setting is provided for compatibility with some broken
     #        clients that send markup even though it's not enabled on the
@@ -146,7 +159,7 @@
     #   %n  progress value if set without any extra characters
     #   %%  Literal %
     # Markup is allowed
-    format = "<big>%s</big>\n\n<small>%b</small>"
+    format = "<b><big>%s</big></b>\n\n<small>%b</small>"
 
     # Alignment of message text.
     # Possible values are "left", "center" and "right".
@@ -161,16 +174,14 @@
     # Set to -1 to disable.
     show_age_threshold = -1
 
-    # Split notifications into multiple lines if they don't fit into
-    # geometry.
-    word_wrap = no
-
-    # When word_wrap is set to no, specify where to make an ellipsis in long lines.
+    # Specify where to make an ellipsis in long lines.
     # Possible values are "start", "middle" and "end".
     ellipsize = end
 
+	word_wrap = no
+
     # Ignore newlines '\n' in notifications.
-    ignore_newline = no
+    ignore_newline = yes
 
     # Stack together notifications with the same content
     stack_duplicates = true
@@ -183,7 +194,7 @@
 
     ### Icons ###
 
-    # Align icons left/right/off
+    # Align icons left/right/top/off
     icon_position = left
 
     # Scale small icons up to this size, set to 0 to disable. Helpful
@@ -209,7 +220,7 @@
     ### Misc/Advanced ###
 
     # dmenu path.
-    dmenu = /home/tomi/.config/rofi/bin/launcher_text
+    dmenu = rofi -m 1 -dmenu -p dunst: drun -modi run,drun,window -drun-display-format {name} -theme .config/rofi/launchers/text/style_2
 
     # Browser for opening urls in context menu.
     browser = /usr/bin/firefox -new-tab
@@ -222,15 +233,6 @@
 
     # Define the class of the windows spawned by dunst
     class = Dunst
-
-    # Manage dunst's desire for talking
-    # Can be one of the following values:
-    #  crit: Critical features. Dunst aborts
-    #  warn: Only non-fatal warnings
-    #  mesg: Important Messages
-    #  info: all unimportant stuff
-    # debug: all less than unimportant stuff
-    ### verbosity = mesg
 
     # Define the corner radius of the notification window
     # in pixel size. If the radius is 0, you have no rounded
@@ -250,7 +252,7 @@
 
     # Uncomment this if you want to let notications appear under fullscreen
     # applications (default: overlay)
-    layer = top
+    # layer = top
 
     # Set this to true to use X11 output on Wayland.
     force_xwayland = false
@@ -283,7 +285,7 @@
     # These values can be strung together for each mouse event, and
     # will be executed in sequence.
     mouse_left_click = do_action
-    mouse_middle_click = none
+    mouse_middle_click = context
     mouse_right_click = close_current
 
 # Experimental features that may or may not work correctly. Do not expect them
@@ -296,37 +298,11 @@
     # where there are multiple screens with very different dpi values.
     per_monitor_dpi = false
 
-# The internal keyboard shortcut support in dunst is now considered deprecated
-# and should be replaced by dunstctl calls. You can use the configuration of your
-# WM or DE to bind these to shortcuts of your choice.
-# Check the dunstctl manual page for more info.
-[shortcuts]
-
-    # Shortcuts are specified as [modifier+][modifier+]...key
-    # Available modifiers are "ctrl", "mod1" (the alt-key), "mod2",
-    # "mod3" and "mod4" (windows-key).
-    # Xev might be helpful to find names for keys.
-
-    # Close notification. Equivalent dunstctl command:
-    # dunstctl close
-    # close = ctrl+space
-
-    # Close all notifications. Equivalent dunstctl command:
-    # dunstctl close-all
-    # close_all = ctrl+shift+space
-
-    # Redisplay last message(s). Equivalent dunstctl command:
-    # dunstctl history-pop
-    # history = ctrl+shift+space
-
-    # Context menu. Equivalent dunstctl command:
-    # dunstctl context
-    # context = ctrl+shift+period
 
 [urgency_low]
     # IMPORTANT: colors have to be defined in quotation marks.
     # Otherwise the "#" and following would be interpreted as a comment.
-    background = "#1a1823" # 222222
+    background = "#1e1e2d" # 222222
     foreground = "#ffffff"
     timeout = 10
     highlight = "#AFAFAF"
@@ -334,7 +310,7 @@
     #icon = /path/to/icon
 
 [urgency_normal]
-    background = "#1a1823"
+    background = "#1e1e2d" # 222222
     foreground = "#ffffff"
     timeout = 10
     highlight = "#AFAFAF"
@@ -342,7 +318,7 @@
     #icon = /path/to/icon
 
 [urgency_critical]
-    background = "#1a1823"
+    background = "#1e1e2d" # 222222
     foreground = "#ffffff"
     timeout = 10
     highlight = "#AFAFAF"
@@ -372,9 +348,17 @@
 #    new_icon
 #    set_stack_tag
 #    set_transient
+#    set_category
 #    timeout
 #    urgency
+#    icon_position
+#    skip_display
+#    history_ignore
 #    action_name
+#    word_wrap
+#    ellipsize
+#    alignment
+#    hide_text
 #
 # Shell-like globbing will get expanded.
 #
@@ -389,8 +373,6 @@
 #   script appname summary body icon urgency
 # where urgency can be "LOW", "NORMAL" or "CRITICAL".
 #
-# NOTE: if you don't want a notification to be displayed, set the format
-# to "".
 # NOTE: It might be helpful to run dunst -print in a terminal in order
 # to find fitting options for rules.
 
@@ -425,12 +407,11 @@
 #[script-test]
 #    summary = "*script*"
 #    script = dunst_test.sh
-#[volume]
-#	format = 
+
 #[ignore]
 #    # This notification will not be displayed
 #    summary = "foobar"
-#    format = ""
+#    skip_display = true
 
 #[history-ignore]
 #    # This notification will not be saved in history
@@ -457,18 +438,11 @@
 #    summary = *says*
 #    urgency = critical
 #
-#[spotify]
+#[Spotify]
 #    appname = Spotify
-#    urgency = low
-#	frame_color = "#55783880"
-#format = "<big><b> %s</b></big>\n\n <small>%b</small>\n"
+#    urgency = normal
+#    format = "<big>%s</big>\n\n<small>%b</small>"
 
-#[discord]
-#	appname = Discord
-#	urgency = low
-#    frame_color = "#6272A480"
-
-#
 #[stack-volumes]
 #    appname = "some_volume_notifiers"
 #    set_stack_tag = "volume"
